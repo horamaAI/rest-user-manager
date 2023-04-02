@@ -33,13 +33,10 @@ public class UserControllerTest {
 
         when(userService.createUser(any(User.class))).thenReturn(user);
 
-        mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(user)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.firstName", is("John")))
-                .andExpect(jsonPath("$.lastName", is("Doe")))
-                .andExpect(jsonPath("$.age", is(25)))
+        mockMvc.perform(
+                post("/users").contentType(MediaType.APPLICATION_JSON).content(asJsonString(user)))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.firstName", is("John")))
+                .andExpect(jsonPath("$.lastName", is("Doe"))).andExpect(jsonPath("$.age", is(25)))
                 .andExpect(jsonPath("$.country", is("France")))
                 .andExpect(jsonPath("$.email", is("johndoe@test.com")))
                 .andExpect(jsonPath("$.password", is(nullValue())));
@@ -55,9 +52,8 @@ public class UserControllerTest {
         user.setEmail("invalidemail");
         user.setPassword("testpass");
 
-        mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(user)))
+        mockMvc.perform(
+                post("/users").contentType(MediaType.APPLICATION_JSON).content(asJsonString(user)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorMessage", is("Invalid input")))
                 .andExpect(jsonPath("$.errors[0].field", is("firstName")))
@@ -65,9 +61,11 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.errors[1].field", is("lastName")))
                 .andExpect(jsonPath("$.errors[1].message", is("Last name cannot be empty")))
                 .andExpect(jsonPath("$.errors[2].field", is("age")))
-                .andExpect(jsonPath("$.errors[2].message", is("Age should be greater than or equal to 18")))
+                .andExpect(jsonPath("$.errors[2].message",
+                        is("Age should be greater than or equal to 18")))
                 .andExpect(jsonPath("$.errors[3].field", is("country")))
-                .andExpect(jsonPath("$.errors[3].message", is("Only users living in France are allowed to register")))
+                .andExpect(jsonPath("$.errors[3].message",
+                        is("Only users living in France are allowed to register")))
                 .andExpect(jsonPath("$.errors[4].field", is("email")))
                 .andExpect(jsonPath("$.errors[4].message", is("Email should be valid")));
     }
@@ -96,7 +94,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.password", is(nullValue())));
     }
 
-    @Test
+@Test
     public void testGetUserWithInvalidId() throws Exception {
         String invalidId = "invalidid";
 
@@ -105,4 +103,3 @@ public class UserControllerTest {
         mockMvc.perform(get("/users/{id}", invalid
 
 
-        

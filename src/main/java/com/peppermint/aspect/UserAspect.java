@@ -1,6 +1,8 @@
 package com.peppermint.aspect;
 
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
@@ -16,5 +18,17 @@ public class UserAspect {
     @Before("execution(* com.example.demo.service.UserService.*(..))")
     public void logBefore(JoinPoint joinPoint) {
         logger.info("Calling method: {}", joinPoint.getSignature().getName());
+    }
+
+
+    @Around("@annotation(LogExecutionTime)")
+    public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+        long startTime = System.currentTimeMillis();
+
+        Object proceed = joinPoint.proceed();
+        logger.info("Execution time for {}: {} ms", joinPoint.getSignature().getName(),
+                (System.currentTimeMillis() - startTime));
+
+        return proceed;
     }
 }
