@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus;
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
 public class BadRequestException extends RuntimeException {
 
-    private List<String> errors;
-
     public BadRequestException(String message) {
         super(message);
     }

@@ -48,17 +48,17 @@ public class UserController {
             List<String> errors = bindingResult.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
-            BadRequestException errorResponse = new BadRequestException(errors);
-            logger.warn("Failed to register user: {}", errorResponse);
-            return ResponseEntity.badRequest().body(errorResponse);
+            BadRequestException badRequestResponse = new BadRequestException(errors);
+            logger.warn("Failed to register user: {}", badRequestResponse);
+            return ResponseEntity.badRequest().body(badRequestResponse);
         }
 
         if (!userService.isValidAgeAndCountry(userCreationDto.getBirthDate(),
                 userCreationDto.getCountry())) {
-            BadRequestException errorResponse = new BadRequestException(
+            BadRequestException badRequestResponse = new BadRequestException(
                     "User must be over 18 years old and living in France to register.");
-            logger.warn("Failed to register user: {}", errorResponse);
-            return ResponseEntity.badRequest().body(errorResponse);
+            logger.warn("Failed to register user: {}", badRequestResponse);
+            return ResponseEntity.badRequest().body(badRequestResponse);
         }
 
         UserDto userDto = userService.registerUser(userCreationDto);
@@ -76,10 +76,10 @@ public class UserController {
             return ResponseEntity.ok(userDto);
         } catch (NotFoundException notFoundExc) {
             // If no user is found with the given ID, return a NOT_FOUND response
-            NotFoundException errorResponse =
+            NotFoundException notFoundResponse =
                     new NotFoundException("User not found with id: " + id);
-            logger.warn("Failed to retrieve user with id {}: {}", id, errorResponse);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            logger.warn("Failed to retrieve user with id {}: {}", id, notFoundResponse);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(notFoundResponse);
         }
     }
 
