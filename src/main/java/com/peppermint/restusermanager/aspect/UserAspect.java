@@ -1,4 +1,4 @@
-package com.peppermint.aspect;
+package com.peppermint.restusermanager.aspect;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;

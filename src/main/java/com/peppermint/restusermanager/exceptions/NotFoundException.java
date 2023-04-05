@@ -1,4 +1,4 @@
-package com.peppermint.exceptions;
+package com.peppermint.restusermanager.exceptions;
 
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.http.HttpStatus;

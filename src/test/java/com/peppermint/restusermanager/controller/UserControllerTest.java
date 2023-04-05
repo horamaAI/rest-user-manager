@@ -1,18 +1,37 @@
 package com.peppermint.restusermanager.controller;
 
+import static org.mockito.Mockito.when;
+import java.time.LocalDate;
+import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.hamcrest.CoreMatchers.is;
+import org.springframework.http.HttpStatus;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+// import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.http.MediaType;
+// import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.peppermint.restusermanager.dao.IUserDAO;
+import com.peppermint.restusermanager.dto.UserCreationDto;
+import com.peppermint.restusermanager.dto.UserDto;
+import com.peppermint.restusermanager.exceptions.NotFoundException;
 import com.peppermint.restusermanager.model.User;
 import com.peppermint.restusermanager.service.UserService;
 
-@RunWith(SpringRunner.class)
-@WebMvcTest(UserController.class)
+// @RunWith(SpringRunner.class)
+@SpringBootTest
+@DisplayName("User controller validation test")
 public class UserControllerTest {
 
     @Autowired
@@ -21,24 +40,30 @@ public class UserControllerTest {
     @MockBean
     private UserService userService;
 
+    private IUserDAO userDAO;
+
     @Test
-    public void testCreateUser() throws Exception {
-        User user = new User();
-        user.setFirstName("John");
-        user.setLastName("Doe");
-        user.setAge(25);
-        user.setCountry("France");
-        user.setEmail("johndoe@test.com");
-        user.setPassword("testpass");
+    public void testRegisterUser() throws Exception {
 
-        when(userService.createUser(any(User.class))).thenReturn(user);
+        UserCreationDto userCreationDto = new UserCreationDto("John", "Doe", "johndoe@example.com",
+                LocalDate.now().minusYears(20), "password", "France");
+        // User user = new User(userCreationDto.getFirstName(), userCreationDto.getLastName(),
+        // userCreationDto.getEmail(), userCreationDto.getPassword(),
+        // userCreationDto.getBirthDate(), userCreationDto.getCountry());
 
-        mockMvc.perform(
-                post("/users").contentType(MediaType.APPLICATION_JSON).content(asJsonString(user)))
-                .andExpect(status().isCreated()).andExpect(jsonPath("$.firstName", is("John")))
+        // UserDto resultDto = userService.registerUser(userCreationDto);
+        UserDto userDto = new UserDto(userCreationDto.getFirstName(), userCreationDto.getLastName(),
+                userCreationDto.getEmail(), userCreationDto.getBirthDate(),
+                userCreationDto.getCountry());
+
+        when(userService.registerUser(userCreationDto)).thenReturn(userDto);
+
+        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(userDto))).andExpect(status().isCreated())
+                .andExpect(jsonPath("$.firstName", is("John")))
                 .andExpect(jsonPath("$.lastName", is("Doe"))).andExpect(jsonPath("$.age", is(25)))
                 .andExpect(jsonPath("$.country", is("France")))
-                .andExpect(jsonPath("$.email", is("johndoe@test.com")))
+                .andExpect(jsonPath("$.email", is("johndoe@example.com")))
                 .andExpect(jsonPath("$.password", is(nullValue())));
     }
 
@@ -47,7 +72,7 @@ public class UserControllerTest {
         User user = new User();
         user.setFirstName("");
         user.setLastName("");
-        user.setAge(17);
+        user.setBirthDate(LocalDate.now().minusYears(17));
         user.setCountry("Spain");
         user.setEmail("invalidemail");
         user.setPassword("testpass");
@@ -76,30 +101,46 @@ public class UserControllerTest {
         user.setId("abc123");
         user.setFirstName("John");
         user.setLastName("Doe");
-        user.setAge(25);
+        user.setBirthDate(LocalDate.now().minusYears(25));
         user.setCountry("France");
         user.setEmail("johndoe@test.com");
         user.setPassword("testpass");
 
-        when(userService.getUserById(user.getId())).thenReturn(Optional.of(user));
+        when(userDAO.save(user)).thenReturn(user);
+        UserDto userDto = new UserDto(user.getFirstName(), user.getLastName(), user.getEmail(),
+                user.getBirthDate(), user.getCountry());
 
-        mockMvc.perform(get("/users/{id}", user.getId()))
-                .andExpect(status().isOk())
+        when(userService.getUserById(user.getId())).thenReturn(userDto);
+
+        mockMvc.perform(get("/users/{id}", user.getId())).andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is("abc123")))
                 .andExpect(jsonPath("$.firstName", is("John")))
-                .andExpect(jsonPath("$.lastName", is("Doe")))
-                .andExpect(jsonPath("$.age", is(25)))
+                .andExpect(jsonPath("$.lastName", is("Doe"))).andExpect(jsonPath("$.age", is(25)))
                 .andExpect(jsonPath("$.country", is("France")))
                 .andExpect(jsonPath("$.email", is("johndoe@test.com")))
                 .andExpect(jsonPath("$.password", is(nullValue())));
     }
 
-@Test
+    @Test
     public void testGetUserWithInvalidId() throws Exception {
-        String invalidId = "invalidid";
+        NotFoundException thrown = Assertions.assertThrows(NotFoundException.class, () -> {
+            userDAO.findById("invalid_id");
+        });
 
-        when(userService.getUserById(invalidId)).thenReturn(Optional.empty());
+        assertTrue(thrown.getMessage().contains("User not found"));
+        when(userDAO.findById("invalid_id")).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/users/{id}", invalid
+        mockMvc.perform(get("/users/{id}", "invalid_id")).andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is("User not found")))
+                .andExpect(jsonPath("$.status", is(HttpStatus.NOT_FOUND.value())))
+                .andExpect(jsonPath("$.error", is(HttpStatus.NOT_FOUND.getReasonPhrase())));
+    }
 
-
+    public static String asJsonString(final Object obj) {
+        try {
+            return new ObjectMapper().writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+}

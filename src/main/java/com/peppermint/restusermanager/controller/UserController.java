@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.peppermint.aspect.LogExecutionTime;
-import com.peppermint.dto.UserCreationDto;
-import com.peppermint.dto.UserDto;
-import com.peppermint.exceptions.BadRequestException;
-import com.peppermint.exceptions.NotFoundException;
+import com.peppermint.restusermanager.aspect.LogExecutionTime;
+import com.peppermint.restusermanager.dto.UserCreationDto;
+import com.peppermint.restusermanager.dto.UserDto;
+import com.peppermint.restusermanager.exceptions.BadRequestException;
+import com.peppermint.restusermanager.exceptions.NotFoundException;
 import com.peppermint.restusermanager.service.UserService;
 
 import jakarta.validation.Valid;
