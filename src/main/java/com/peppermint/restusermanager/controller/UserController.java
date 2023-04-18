@@ -2,7 +2,7 @@ package com.peppermint.restusermanager.controller;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
+import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -23,8 +23,6 @@ import com.peppermint.restusermanager.exceptions.BadRequestException;
 import com.peppermint.restusermanager.exceptions.NotFoundException;
 import com.peppermint.restusermanager.service.UserService;
 
-import jakarta.validation.Valid;
-
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -44,7 +42,8 @@ public class UserController {
             @RequestParam(required = false, defaultValue = "false") Boolean isAdmin) {
 
         if (bindingResult.hasErrors()) {
-            // If there are validation errors, return a BAD_REQUEST response with the error details
+            // If there are validation errors, return a BAD_REQUEST response with the error
+            // details
             List<String> errors = bindingResult.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());

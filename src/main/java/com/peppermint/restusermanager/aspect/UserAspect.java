@@ -15,10 +15,11 @@ import org.slf4j.LoggerFactory;
 public class UserAspect {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Before("execution(* com.example.demo.service.UserService.*(..))")
-    public void logBefore(JoinPoint joinPoint) {
-        logger.info("Calling method: {}", joinPoint.getSignature().getName());
-    }
+    // seems to not work
+    // @Before("execution(* com.peppermint.restusermanager.UserService.*(..))")
+    // public void logBefore(JoinPoint joinPoint) {
+    // logger.info("Calling method: {}", joinPoint.getSignature().getName());
+    // }
 
 
     @Around("@annotation(LogExecutionTime)")
