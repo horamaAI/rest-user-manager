@@ -9,6 +9,7 @@
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>com.peppermint</groupId>
 	<artifactId>rest-user-manager</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -55,7 +56,11 @@
 			<artifactId>modelmapper</artifactId>
 			<version>3.1.0</version>
 		</dependency>
-
+		<!--	Java 8 Datatypes	-->
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jdk8</artifactId>
+		</dependency>
 		<!-- @runwith doesn't work without -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>

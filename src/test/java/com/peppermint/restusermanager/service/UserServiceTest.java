@@ -14,6 +14,7 @@ import org.modelmapper.ModelMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import com.peppermint.restusermanager.dao.IUserDAO;
@@ -25,6 +26,7 @@ import com.peppermint.restusermanager.model.User;
 
 @SpringBootTest
 @DisplayName("User service validation test")
+@AutoConfigureMockMvc
 public class UserServiceTest {
 
     @Autowired
@@ -35,11 +37,6 @@ public class UserServiceTest {
 
     @MockBean
     private ModelMapper modelMapper;
-
-    @BeforeEach
-    public void setUp() {
-        userService = new UserService(userDAO, modelMapper);
-    }
 
     @Test
     public void testRegisterUserSuccess() throws Exception {
