@@ -9,43 +9,40 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.peppermint.dto.UserCreationDto;
-import com.peppermint.dto.UserDto;
-import com.peppermint.exceptions.BadRequestException;
-import com.peppermint.exceptions.NotFoundException;
 import com.peppermint.restusermanager.dao.IUserDAO;
+import com.peppermint.restusermanager.dto.UserCreationDto;
+import com.peppermint.restusermanager.dto.UserDto;
+import com.peppermint.restusermanager.exceptions.InvalidUserException;
+import com.peppermint.restusermanager.exceptions.NotFoundException;
 import com.peppermint.restusermanager.model.User;
 
 @Service
 public class UserService {
 
-    private IUserDAO userDAO;
-    private final ModelMapper modelMapper;
-
     @Autowired
-    public UserService(IUserDAO userDAO, ModelMapper modelMapper) {
-        this.userDAO = userDAO;
-        this.modelMapper = modelMapper;
-    }
+    private IUserDAO userDAO;
+    @Autowired
+    private ModelMapper modelMapper;
+
 
     public UserDto registerUser(@RequestBody UserCreationDto userCreationDto) {
         if (userDAO.findByEmail(userCreationDto.getEmail()).isPresent()) {
-            throw new BadRequestException("Email already exists");
+            throw new InvalidUserException("Email already exists");
         }
 
         if (!isValidAgeAndCountry(userCreationDto.getBirthDate(), userCreationDto.getCountry())) {
-            throw new BadRequestException(
+            throw new InvalidUserException(
                     "User must be over 18 years old and live in France to create an account");
         }
 
         User user = new User(userCreationDto.getFirstName(), userCreationDto.getLastName(),
                 userCreationDto.getEmail(), userCreationDto.getPassword(),
-                userCreationDto.getBirthDate(), userCreationDto.getCountry());
+                userCreationDto.getCountry(), userCreationDto.getBirthDate());
         User savedUser = userDAO.save(user);
         return modelMapper.map(savedUser, UserDto.class);
     }
 
-    public UserDto getUserById(String id) {
+    public UserDto getUserById(String id) throws NotFoundException {
         Optional<User> optionalUser = userDAO.findById(id);
         if (optionalUser.isPresent()) {
             return modelMapper.map(optionalUser.get(), UserDto.class);
@@ -54,9 +51,9 @@ public class UserService {
         }
     }
 
-
     public List<UserDto> getAllUsers() {
         List<User> users = userDAO.findAll();
+
         return users.stream().map(user -> modelMapper.map(user, UserDto.class))
                 .collect(Collectors.toList());
     }
@@ -79,7 +76,9 @@ public class UserService {
 
     public boolean isValidAgeAndCountry(LocalDate birthDate, String country) {
         LocalDate todayDate = LocalDate.now();
-        return (Period.between(birthDate, todayDate).getYears() >= 18 && country.equals("France"));
+        int age = Period.between(birthDate, todayDate).getYears();
+        boolean isInFrance = country.equals("France");
+        return (age >= 18 && isInFrance);
 
     }
 }

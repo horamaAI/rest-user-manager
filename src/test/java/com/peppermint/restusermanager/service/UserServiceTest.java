@@ -1,118 +1,109 @@
+
 package com.peppermint.restusermanager.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+import java.time.LocalDate;
+import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import com.peppermint.restusermanager.dao.UserRepository;
+import com.peppermint.restusermanager.dao.IUserDAO;
+import com.peppermint.restusermanager.dto.UserCreationDto;
+import com.peppermint.restusermanager.dto.UserDto;
+import com.peppermint.restusermanager.exceptions.InvalidUserException;
+import com.peppermint.restusermanager.exceptions.NotFoundException;
 import com.peppermint.restusermanager.model.User;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
+@DisplayName("User service validation test")
+@AutoConfigureMockMvc
 public class UserServiceTest {
 
     @Autowired
     private UserService userService;
 
     @MockBean
-    private UserRepository userRepository;
+    private IUserDAO userDAO;
 
     @Test
     public void testRegisterUserSuccess() throws Exception {
-        // Arrange
-        User user = new User();
-        user.setFirstName("John");
-        user.setLastName("Doe");
-        user.setEmail("john.doe@test.com");
-        user.setAge(25);
-        user.setCountry("France");
 
-        when(userRepository.save(user)).thenReturn(user);
+        UserCreationDto userCreationDto = new UserCreationDto("John", "Doe", "johndoe@example.com",
+                LocalDate.now().minusYears(25), "France", "password");
+
+        User user = new User(userCreationDto.getFirstName(), userCreationDto.getLastName(),
+                userCreationDto.getEmail(), userCreationDto.getPassword(),
+                userCreationDto.getCountry(), userCreationDto.getBirthDate());
+
+        when(userDAO.save(user)).thenReturn(user);
 
         // Act
-        User result = userService.registerUser(user);
+        UserDto resultDto = userService.registerUser(userCreationDto);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(user.getFirstName(), result.getFirstName());
-        assertEquals(user.getLastName(), result.getLastName());
-        assertEquals(user.getEmail(), result.getEmail());
-        assertEquals(user.getAge(), result.getAge());
-        assertEquals(user.getCountry(), result.getCountry());
+        assertNotNull(resultDto);
+        assertEquals(user.getFirstName(), resultDto.getFirstName());
+        assertEquals(user.getLastName(), resultDto.getLastName());
+        assertEquals(user.getEmail(), resultDto.getEmail());
+        assertEquals(user.getBirthDate(), resultDto.getBirthDate());
+        assertEquals(user.getCountry(), resultDto.getCountry());
     }
 
-    @Test(expected = InvalidUserException.class)
-    public void testRegisterUserInvalidAge() throws Exception {
-        // Arrange
-        User user = new User();
-        user.setFirstName("John");
-        user.setLastName("Doe");
-        user.setEmail("john.doe@test.com");
-        user.setAge(15);
-        user.setCountry("France");
+    @Test
+    public void testRegisterInvalidUser() throws Exception {
+        UserCreationDto userCreationDto = new UserCreationDto("John", "Doe", "johndoe@example.com",
+                LocalDate.now().minusYears(15), "password", "Belgium");
 
-        // Act
-        userService.registerUser(user);
+        InvalidUserException thrown = Assertions.assertThrows(InvalidUserException.class, () -> {
+            userService.registerUser(userCreationDto);
+        });
 
-        // Assert
-        // InvalidUserException should be thrown
-    }
-
-    @Test(expected = InvalidUserException.class)
-    public void testRegisterUserInvalidCountry() throws Exception {
-        // Arrange
-        User user = new User();
-        user.setFirstName("John");
-        user.setLastName("Doe");
-        user.setEmail("john.doe@test.com");
-        user.setAge(25);
-        user.setCountry("USA");
-
-        // Act
-        userService.registerUser(user);
-
-        // Assert
-        // InvalidUserException should be thrown
+        assertTrue(thrown.getMessage().contains("must be over 18 years"));
+        assertTrue(thrown.getMessage().contains("live in France"));
     }
 
     @Test
     public void testGetUserDetailsSuccess() throws Exception {
         // Arrange
-        User user = new User();
-        user.setId("123");
-        user.setFirstName("John");
-        user.setLastName("Doe");
-        user.setEmail("john.doe@test.com");
-        user.setAge(25);
-        user.setCountry("France");
+        User user = new User("123", "John", "Doe", "john.doe@test.com", "yolo", "France",
+                LocalDate.now().minusYears(25));
 
-        when(userRepository.findById("123")).thenReturn(Optional.of(user));
+
+        when(userDAO.save(user)).thenReturn(user);
 
         // Act
-        User result = userService.getUserDetails("123");
+        userService.save(user);
+        String email = user.getEmail();
+        when(userDAO.findByEmail(email)).thenReturn(Optional.of(user));
+        Optional<User> result = userService.getByEmail(email);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(user.getId(), result.getId());
-        assertEquals(user.getFirstName(), result.getFirstName());
-        assertEquals(user.getLastName(), result.getLastName());
-        assertEquals(user.getEmail(), result.getEmail());
-        assertEquals(user.getAge(), result.getAge());
-        assertEquals(user.getCountry(), result.getCountry());
+        assertTrue(result.isPresent());
+        User userResult = result.get();
+        assertEquals(user.getId(), userResult.getId());
+        assertEquals(user.getFirstName(), userResult.getFirstName());
+        assertEquals(user.getLastName(), userResult.getLastName());
+        assertEquals(user.getEmail(), userResult.getEmail());
+        assertEquals(user.getBirthDate(), userResult.getBirthDate());
+        assertEquals(user.getCountry(), userResult.getCountry());
     }
 
-    @Test(expected = UserNotFoundException.class)
+    @Test
     public void testGetUserDetailsUserNotFound() throws Exception {
-        // Arrange
-        when(userRepository.findById("123")).thenReturn(Optional.empty());
+        when(userDAO.findById("125")).thenReturn(Optional.empty());
+        NotFoundException thrown = Assertions.assertThrows(NotFoundException.class, () -> {
+            userService.getUserById("125");
+        });
 
-        // Act
-        userService.getUserDetails("123");
-
-        // Assert
-        // UserNotFoundException should be thrown
+        assertTrue(thrown.getMessage().contains("User not found"));
     }
 }

@@ -1,4 +1,4 @@
-package com.peppermint.aspect;
+package com.peppermint.restusermanager.aspect;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
