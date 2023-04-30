@@ -34,14 +34,11 @@ public class UserServiceTest {
     @MockBean
     private IUserDAO userDAO;
 
-    @MockBean
-    private ModelMapper modelMapper;
-
     @Test
     public void testRegisterUserSuccess() throws Exception {
 
         UserCreationDto userCreationDto = new UserCreationDto("John", "Doe", "johndoe@example.com",
-                LocalDate.now().minusYears(25), "password", "France");
+                LocalDate.now().minusYears(25), "France", "password");
 
         User user = new User(userCreationDto.getFirstName(), userCreationDto.getLastName(),
                 userCreationDto.getEmail(), userCreationDto.getPassword(),
@@ -80,15 +77,17 @@ public class UserServiceTest {
         User user = new User("123", "John", "Doe", "john.doe@test.com", "yolo", "France",
                 LocalDate.now().minusYears(25));
 
-        userService.save(user);
 
-        when(userDAO.findById("123")).thenReturn(Optional.of(user));
+        when(userDAO.save(user)).thenReturn(user);
 
         // Act
-        Optional<User> result = userService.getByEmail("john.doe@test.com");
+        userService.save(user);
+        String email = user.getEmail();
+        when(userDAO.findByEmail(email)).thenReturn(Optional.of(user));
+        Optional<User> result = userService.getByEmail(email);
 
         // Assert
-        assertFalse(!result.isPresent());
+        assertTrue(result.isPresent());
         User userResult = result.get();
         assertEquals(user.getId(), userResult.getId());
         assertEquals(user.getFirstName(), userResult.getFirstName());
@@ -100,12 +99,10 @@ public class UserServiceTest {
 
     @Test
     public void testGetUserDetailsUserNotFound() throws Exception {
-
-        NotFoundException thrown = Assertions.assertThrows(NotFoundException.class, () -> {
-            userDAO.findById("125");
-        });
-
         when(userDAO.findById("125")).thenReturn(Optional.empty());
+        NotFoundException thrown = Assertions.assertThrows(NotFoundException.class, () -> {
+            userService.getUserById("125");
+        });
 
         assertTrue(thrown.getMessage().contains("User not found"));
     }
