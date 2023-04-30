@@ -123,6 +123,22 @@ public class UserControllerTest {
         }
 
         @Test
+        public void testCreateUserWithAge() throws Exception {
+                UserCreationDto userCreationDto = new UserCreationDto("John", "Doe",
+                                "johndoe@example.com", LocalDate.now().minusYears(17), "Spain",
+                                "testpass");
+
+                StringWriter writer = new StringWriter();
+
+                mockMvc.perform(post("/api/users/register").contentType(MediaType.APPLICATION_JSON)
+                                .content(asJsonString(userCreationDto)))
+                                .andExpect(status().isBadRequest())
+                                .andDo(MockMvcResultHandlers.print(writer))
+                                .andExpect(jsonPath("$.errors[0]", is(
+                                                "User must be over 18 years old and living in France to register.")));
+        }
+
+        @Test
         public void testGetUserByID() throws Exception {
                 User user = new User("abc123", "John", "Doe", "johndoe@test.com", "testpass2",
                                 "France", LocalDate.now().minusYears(25));

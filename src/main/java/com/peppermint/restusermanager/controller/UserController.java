@@ -42,8 +42,8 @@ public class UserController {
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
             BadRequestException badRequestResponse = new BadRequestException(errors);
-            logger.warn("Failed to register user: [\"{}\"]", userCreationDto.getFirstName(),
-                    badRequestResponse);
+            logger.warn("Bad request: failed to register user: '{}'",
+                    userCreationDto.getFirstName(), badRequestResponse);
             return ResponseEntity.badRequest().body(badRequestResponse);
         }
 
@@ -51,8 +51,9 @@ public class UserController {
                 userCreationDto.getCountry())) {
             BadRequestException badRequestResponse = new BadRequestException(
                     "User must be over 18 years old and living in France to register.");
-            logger.warn("Failed to register user: {}", userCreationDto.getFirstName(),
-                    badRequestResponse);
+            logger.warn(
+                    "Bad request: wrong country, or underaged user, failed to register user: {}",
+                    userCreationDto.getFirstName(), badRequestResponse);
             return ResponseEntity.badRequest().body(badRequestResponse);
         }
 
@@ -72,7 +73,7 @@ public class UserController {
             NotFoundException notFoundResponse =
                     new NotFoundException("User not found with id: " + id);
             logger.warn("Failed to retrieve user with id {}: {}", id, notFoundResponse);
-            
+
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(notFoundResponse);
         }
     }

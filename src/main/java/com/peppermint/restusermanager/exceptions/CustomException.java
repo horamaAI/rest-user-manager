@@ -16,7 +16,6 @@ public class CustomException extends RuntimeException {
         super(errorMessage);
         this.status = status;
         this.errors = Collections.singletonList(errorMessage);
-        System.out.println("xoxo customexc constructor: " + status);
 
     }
 
