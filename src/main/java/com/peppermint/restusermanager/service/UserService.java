@@ -42,7 +42,7 @@ public class UserService {
         System.out.println("xoxo in userservice.registerUser 3");
         User user = new User(userCreationDto.getFirstName(), userCreationDto.getLastName(),
                 userCreationDto.getEmail(), userCreationDto.getPassword(),
-                userCreationDto.getBirthDate(), userCreationDto.getCountry());
+                userCreationDto.getCountry(), userCreationDto.getBirthDate());
         System.out.println("xoxo in userservice.registerUser 4");
         System.out.println("xoxo dao is null ? : " + (userDAO == null));
         User savedUser = userDAO.save(user);
@@ -52,11 +52,14 @@ public class UserService {
         return userDto;
     }
 
-    public UserDto getUserById(String id) {
+    public UserDto getUserById(String id) throws NotFoundException {
         Optional<User> optionalUser = userDAO.findById(id);
+        System.out.println("xoxo so it begins!!!");
         if (optionalUser.isPresent()) {
+            System.out.println("xoxo WTF!!!");
             return modelMapper.map(optionalUser.get(), UserDto.class);
         } else {
+            System.out.println("xoxo YAAAAS!!!");
             throw new NotFoundException("User not found");
         }
     }

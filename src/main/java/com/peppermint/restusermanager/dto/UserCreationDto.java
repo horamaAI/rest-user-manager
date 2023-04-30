@@ -2,6 +2,8 @@ package com.peppermint.restusermanager.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -20,8 +22,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserCreationDto {
 
+    @NotBlank(message = "First name is mandatory")
     private String firstName;
     private String lastName;
+    @Email(message = "Valid email is mandatory")
     private String email;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)

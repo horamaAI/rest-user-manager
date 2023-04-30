@@ -12,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,7 +45,7 @@ public class UserServiceTest {
 
         User user = new User(userCreationDto.getFirstName(), userCreationDto.getLastName(),
                 userCreationDto.getEmail(), userCreationDto.getPassword(),
-                userCreationDto.getBirthDate(), userCreationDto.getCountry());
+                userCreationDto.getCountry(), userCreationDto.getBirthDate());
 
         when(userDAO.save(user)).thenReturn(user);
 
@@ -78,13 +77,8 @@ public class UserServiceTest {
     @Test
     public void testGetUserDetailsSuccess() throws Exception {
         // Arrange
-        User user = new User();
-        user.setId("123");
-        user.setFirstName("John");
-        user.setLastName("Doe");
-        user.setEmail("john.doe@test.com");
-        user.setBirthDate(LocalDate.now().minusYears(25));
-        user.setCountry("France");
+        User user = new User("123", "John", "Doe", "john.doe@test.com", "yolo", "France",
+                LocalDate.now().minusYears(25));
 
         userService.save(user);
 
