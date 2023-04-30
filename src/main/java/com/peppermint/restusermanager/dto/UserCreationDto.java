@@ -37,7 +37,6 @@ public class UserCreationDto {
 
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
         return "UserCreationDto:{firstName:'" + firstName + "', lastName:'" + lastName
                 + "', email:'" + email + "', birthDate:'" + birthDate.toString() + "', country:'"
                 + country + "', password:'" + password + "'}";

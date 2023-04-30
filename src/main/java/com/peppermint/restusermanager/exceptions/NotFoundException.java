@@ -10,7 +10,6 @@ public class NotFoundException extends CustomException {
 
     public NotFoundException(String message) {
         super(message, HttpStatus.NOT_FOUND);
-        System.out.println("xoxo notfoundexc constructor: " + HttpStatus.NOT_FOUND);
     }
 
     public NotFoundException(String message, Throwable cause) {

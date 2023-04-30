@@ -64,23 +64,16 @@ public class UserController {
     @GetMapping("/{id}")
     @LogExecutionTime
     public ResponseEntity<?> getUserById(@PathVariable("id") String id) {
-        System.out.println("xoxo spider-cochon");
         try {
             UserDto userDto = userService.getUserById(id);
             logger.info("Retrieved user with email: {}", userDto.getEmail());
             return ResponseEntity.ok(userDto);
         } catch (NotFoundException notFoundExc) {
-            // If no user is found with the given ID, return a NOT_FOUND response
             NotFoundException notFoundResponse =
                     new NotFoundException("User not found with id: " + id);
             logger.warn("Failed to retrieve user with id {}: {}", id, notFoundResponse);
-            ResponseEntity<?> res =
-                    ResponseEntity.status(HttpStatus.NOT_FOUND).body(notFoundResponse);
-            System.out.println("xoxo spider-cochon OUPS!! notfoundresponse to string "
-                    + notFoundExc.toString());
-            System.out.println(
-                    "xoxo spider-cochon OUPS!! response entity to string " + res.toString());
-            return res;
+            
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(notFoundResponse);
         }
     }
 
